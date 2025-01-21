@@ -140,10 +140,137 @@ It is a user-defined data type in C that allows grouping together variables of d
     inet_pton(AF_INET6, "2001:db8:63b3:1::3490", &(sa6.sin6_addr));
 
 
+## Pointers
 
-#### Private IP Address
+Pointers are variables that store the memory address of another variable.
+
+ex:
+
+    int a = 10;
+    int *p = &a;
+
+1. Address-of Operator (&) : Returns the memory address of a variable.
+2. Dereference Operator (*): Accesses the value at the memory address stored in the pointer.
+
+### Private IP Address
 
 Private IP addresses are reserved for use within private networks and are not routable on the public internet. Some common private IP address ranges include:
+
+
+### Librearyes
+
+    <stdin.h>  --> Input/Output.
+    <string.h> --> For string like copy string and compaire.
+    <stdlib.h> --> Memory related work.
+    <unistd.h> --> For file descriptor (read() and close()).
+    <arpa/inet.h> --> IP related work.
+    <sys.socket.h> --> For Socket.
+
+
+
+## Socket
+It used to create a socket.
+
+### How to create socket:
+    Server:                        Client:
+
+
+    Socket()                       Socket()
+        |                             | 
+     Bind()                           |
+        |                          Connetct()      
+    Listen()                          |  
+        |                             |
+    Accept()                          |
+        |                             |
+    Send/Recv  <--------------->  Send/Recv  
+
+
+
+### Socket():
+socket() function is used to create a socket which returns a file descriptor if socket is created else error.
+
+Syntax:
+
+    int socket(int domain, int type, int protocol);
+
+    domain: It can be AF_INET (IPv4) or AF_INET6 (IPv6) 
+    type: Specifies the type of socket (SOCK_STREAM or SOCK_DGRAM).
+    protocol: 0 used to the default protocol.
+
+
+### Bind():
+Bind() associate a socket with a specific IP address and port number it returns 0 on succesfull and -1 on error.
+
+Syntax:
+
+    int bind(int sockfd, const struct sockaddr *addr, ocklen_t *addrlen);
+
+    sockfd: It called File descriptor socket() function return it.
+    struct sockaddr *addr: It's specifies the IP address and port to bind.
+    ocklen_t *addrlen: The size of the struct sockaddr addr.
+
+    INADDR_ANY: Binds the socket to any available network;
+
+
+## Listen():
+it will accept incoming connection requests from clients it returns 0 on success and -1 on error.
+
+Syntax:
+
+    int listen(int sockfd, int backlog);
+
+    sockfd: It called File descriptor socket() function return it.
+    backlog: Maximum number of pending connections allowed in the queue before the server starts.
+
+
+Socket is concidered is a active(Initiates connections) but after using listen it become passive(Means it waites when client will connect). 
+
+
+## Accept():
+This function accept an incoming connection request from a client.
+
+Syntax:
+
+    int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+    
+    sockfd: A file descriptor of the passive socket created.
+    struct sockaddr *addr: A pointer who hold IP address and port.
+    socklen_t *addrlen: holds the size of the addr structure.
+
+
+
+### Important Functions:
+
+    memset(): Used to fill a block of memory with a specific value.
+    
+    char buffer[1024];
+    memset(buffer, 0, BUFFER_SIZE);
+
+
+    close(): Closes a file descriptor.
+    close(server_fd);
+
+
+    fgets(): Reads a string from the specified input
+    fgets(buffer, BUFFER_SIZE, stdin);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
