@@ -256,20 +256,111 @@ Syntax:
     fgets(buffer, BUFFER_SIZE, stdin);
 
 
+## send() and read():
+These functions allow sending and receiving data between two connected users. 
+
+### send():
+
+Syntax:
+
+    send(new_socket, buffer, strlen(buffer), 0);
+
+    new_socket: A file descriptor of the passive socket created.
+    buffer: Massage which we want to send.
+    strlen(buffer): Length of the massage.
+    0: Set to 0 for default behavior.
+
+
+
+### read():
+
+Syntax:
+
+    read(new_socket, buffer, BUFFER_SIZE)
+
+    new_socket: A file descriptor of the passive socket created.
+    buffer: Massage which we want to send.
+    BUFFER_SIZE: Length of the massage.
+
+
+### close():
+It used to close file descriptor.
+
+Syntax:
+
+    close(sock);
+
+    sock: A file descriptor of the passive socket created.
+    
+
+### Client-Server Model:
+The client-server model is a fundamental concept where two diffrent things (server and client) communicate together it's a backbone of modern network-based applications.
+
+
+#### Steps:
+
+    1. Client starts to connect to the server.
+    2. The client sends a request to the server.
+    3. Server process the request and prepares the response.
+    4. server sends the requested data back to the client.
+    5. After communication is complete, the connection is closed.
+
+
+#### Protocols:
+    1. TCP (Transmission Control Protocol): Slower communication but data is secure.
+    2. UDP (User Datagram Protocol): Faster communication but data can lost.
+    3. HTTP/HTTPS: For web Application.
+
+
+
+### perror() and strerror():
+
+    perror(): Prints an error message.
+    perror("Socket failed");
+
+
+
+    strerror(): Returns a pointer to a string containing the error message.
+    *strerror(int errnum);
+
+
+
+
+### exit():
+The exit() function is used to terminate a program.
+
+ex:
+
+    exit(EXIT_FAILURE);
 
 
 
 
 
 
+## For running the programme:
+
+Before starting the steps on your computer it must have GCC.
 
 
+### Step-1:
+
+Make a clone of this repo - 
+    https://github.com/rishavtiwari22/socket.git
 
 
+### Step - 2:
+    
+    Run the commands
+
+    For server 
+    gcc server.c -o server
+    ./server
 
 
-
-
+    For client
+    gcc client.c -o client
+    ./client
 
 
 
