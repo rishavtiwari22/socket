@@ -28,7 +28,7 @@ void *client_handler(void *arg) {
         buffer[bytesRead] = '\0';
         printf("%s: %s", client->username, buffer);
 
-        // Check if the message is a private message
+ 
         if (buffer[0] == '@') {
             char target_user[BUFFER_SIZE];
             char message[BUFFER_SIZE];
@@ -45,7 +45,6 @@ void *client_handler(void *arg) {
             }
             pthread_mutex_unlock(&clients_mutex);
         } else {
-            // Broadcast the message to all clients
             pthread_mutex_lock(&clients_mutex);
             for (int i = 0; i < client_count; i++) {
                 if (clients[i].socket != client->socket) {
@@ -56,7 +55,6 @@ void *client_handler(void *arg) {
         }
     }
 
-    // Remove the client from the list
     pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < client_count; i++) {
         if (clients[i].socket == client->socket) {
@@ -110,7 +108,7 @@ int main() {
             client_info *client = (client_info *)malloc(sizeof(client_info));
             client->socket = new_socket;
             read(client->socket, client->username, BUFFER_SIZE);
-            client->username[strlen(client->username) - 1] = '\0'; // Remove newline
+            client->username[strlen(client->username) - 1] = '\0';
             clients[client_count++] = *client;
 
             pthread_t thread;
