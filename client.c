@@ -1,17 +1,32 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <pthread.h>
 
 #define PORT 8000
 #define BUFFER_SIZE 1024
+
+void *receive_messages(void *arg) {
+    int sock = *(int *)arg;
+    char buffer[BUFFER_SIZE];
+    int bytesRead;
+
+    while ((bytesRead = read(sock, buffer, BUFFER_SIZE)) > 0) {
+        buffer[bytesRead] = '\0';
+        printf("%s", buffer);
+    }
+
+    return NULL;
+}
 
 int main() {
     int sock;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
+    char username[BUFFER_SIZE];
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Socket creation error");
@@ -31,24 +46,18 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    printf("Enter your username: ");
+    fgets(username, BUFFER_SIZE, stdin);
+    send(sock, username, strlen(username), 0);
+
+    pthread_t thread;
+    pthread_create(&thread, NULL, receive_messages, (void *)&sock);
+    pthread_detach(thread);
+
     while (1) {
-        printf("Client: ");
         fgets(buffer, BUFFER_SIZE, stdin);
         send(sock, buffer, strlen(buffer), 0);
         if (strncmp(buffer, "exit", 4) == 0) break;
-
-        memset(buffer, 0, BUFFER_SIZE);
-        int bytesRead = read(sock, buffer, BUFFER_SIZE);
-        if (bytesRead > 0) {
-            printf("Server: %s", buffer);
-            if (strncmp(buffer, "exit", 4) == 0) break;
-        } else if (bytesRead == 0) {
-            printf("Connection closed by server\n");
-            break;
-        } else {
-            perror("read error");
-            break;
-        }
     }
 
     close(sock);
