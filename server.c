@@ -17,7 +17,6 @@ typedef struct {
 
 client_info clients[MAX_CLIENTS];
 int client_count = 0;
-pthread_mutex_t clients_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void *client_handler(void *arg) {
     client_info *client = (client_info *)arg;
@@ -28,13 +27,11 @@ void *client_handler(void *arg) {
         buffer[bytesRead] = '\0';
         printf("%s: %s", client->username, buffer);
 
- 
         if (buffer[0] == '@') {
             char target_user[BUFFER_SIZE];
             char message[BUFFER_SIZE];
             sscanf(buffer, "@%s %[^\n]", target_user, message);
 
-            pthread_mutex_lock(&clients_mutex);
             for (int i = 0; i < client_count; i++) {
                 if (strcmp(clients[i].username, target_user) == 0) {
                     char private_message[BUFFER_SIZE];
@@ -43,19 +40,15 @@ void *client_handler(void *arg) {
                     break;
                 }
             }
-            pthread_mutex_unlock(&clients_mutex);
         } else {
-            pthread_mutex_lock(&clients_mutex);
             for (int i = 0; i < client_count; i++) {
                 if (clients[i].socket != client->socket) {
                     send(clients[i].socket, buffer, strlen(buffer), 0);
                 }
             }
-            pthread_mutex_unlock(&clients_mutex);
         }
     }
 
-    pthread_mutex_lock(&clients_mutex);
     for (int i = 0; i < client_count; i++) {
         if (clients[i].socket == client->socket) {
             clients[i] = clients[client_count - 1];
@@ -63,7 +56,6 @@ void *client_handler(void *arg) {
             break;
         }
     }
-    pthread_mutex_unlock(&clients_mutex);
 
     close(client->socket);
     free(client);
@@ -76,7 +68,7 @@ int main() {
     int addr_len = sizeof(address);
 
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        perror("Socket failed");
+        printf("Socket failed");
         exit(EXIT_FAILURE);
     }
 
@@ -85,13 +77,13 @@ int main() {
     address.sin_port = htons(PORT);
 
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        perror("Bind failed");
+        printf("Bind failed");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
 
     if (listen(server_fd, 3) < 0) {
-        perror("Listen failed");
+        printf("Listen failed");
         close(server_fd);
         exit(EXIT_FAILURE);
     }
@@ -99,16 +91,15 @@ int main() {
 
     while (1) {
         if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addr_len)) < 0) {
-            perror("Accept failed");
+            printf("Accept failed");
             continue;
         }
 
-        pthread_mutex_lock(&clients_mutex);
         if (client_count < MAX_CLIENTS) {
             client_info *client = (client_info *)malloc(sizeof(client_info));
             client->socket = new_socket;
-            read(client->socket, client->username, BUFFER_SIZE);
-            client->username[strlen(client->username) - 1] = '\0';
+            int bytes = read(client->socket, client->username, BUFFER_SIZE);
+            client->username[bytes - 1] = '\0'; 
             clients[client_count++] = *client;
 
             pthread_t thread;
@@ -117,7 +108,6 @@ int main() {
         } else {
             close(new_socket);
         }
-        pthread_mutex_unlock(&clients_mutex);
     }
 
     close(server_fd);
